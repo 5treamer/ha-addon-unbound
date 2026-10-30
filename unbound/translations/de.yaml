@@ -1,0 +1,131 @@
+---
+configuration:
+  access_control:
+    name: Erlaubte Netze
+    description: >-
+      Netze (CIDR), die Unbound abfragen dürfen; alles andere wird abgewiesen.
+      Standard: nur private Bereiche. Auf das eigene Netz verengen, aber
+      172.30.32.0/23 behalten, wenn AdGuard über 127.0.0.1 fragt (Docker-Bridge).
+  do_ip4:
+    name: IPv4 verwenden
+    description: Anfragen über IPv4 beantworten und stellen.
+  do_ip6:
+    name: IPv6 verwenden
+    description: >-
+      Anfragen an Nameserver über IPv6 stellen. Standardmäßig aus - nur
+      einschalten, wenn die (LTE-)Verbindung funktionierendes IPv6 hat.
+  do_udp:
+    name: UDP verwenden
+    description: Anfragen über UDP beantworten und stellen.
+  do_tcp:
+    name: TCP verwenden
+    description: >-
+      Anfragen über TCP beantworten und stellen. Eingeschaltet lassen - große
+      Antworten weichen auf TCP aus.
+  num_threads:
+    name: Threads
+    description: Anzahl der Worker-Threads (2 reicht für einen Raspberry Pi 4).
+  msg_cache_size_mb:
+    name: Message-Cache (MB)
+    description: Größe des Message-Caches in MB.
+  rrset_cache_size_mb:
+    name: RRset-Cache (MB)
+    description: Größe des RRset-Caches in MB (etwa doppelt so groß wie der Message-Cache).
+  cache_min_ttl:
+    name: Minimale Cache-TTL (s)
+    description: Minimale Cache-Dauer. 0 respektiert die TTL des Zonenbetreibers.
+  cache_max_ttl:
+    name: Maximale Cache-TTL (s)
+    description: Maximale Cache-Dauer.
+  prefetch:
+    name: Prefetch
+    description: Häufig genutzte Einträge kurz vor Ablauf erneuern.
+  serve_expired:
+    name: Abgelaufene Einträge ausliefern (serve-stale)
+    description: >-
+      Aus abgelaufenem Cache antworten, solange die Server langsam oder nicht
+      erreichbar sind (RFC 8767). Für LTE empfohlen.
+  qname_minimisation:
+    name: QNAME-Minimierung
+    description: Jedem Server nur den nötigen Namensteil senden (Datenschutz, RFC 9156).
+  aggressive_nsec:
+    name: Aggressive NSEC
+    description: Nicht existierende Namen anhand signierter NSEC-Einträge aus dem Cache beantworten (RFC 8198).
+  harden_dnssec_stripped:
+    name: Härtung DNSSEC-Stripping
+    description: Signierte Zonen mit fehlenden Signaturen als ungültig behandeln.
+  harden_glue:
+    name: Härtung Glue
+    description: Nur Glue-Einträge innerhalb der Zuständigkeit des Servers vertrauen.
+  harden_below_nxdomain:
+    name: Härtung unterhalb NXDOMAIN
+    description: Namen unterhalb eines NXDOMAIN gelten als nicht existent (RFC 8020).
+  harden_referral_path:
+    name: Härtung Delegationspfad
+    description: >-
+      Zusätzliche Prüfung des Delegationspfads. Experimentell, erzeugt
+      zusätzliche Anfragen - standardmäßig aus.
+  edns_buffer_size:
+    name: EDNS-Puffergröße
+    description: >-
+      Maximale UDP-Antwortgröße. 1232 vermeidet Fragmentierung (Paketverlust
+      im Mobilfunk); größere Antworten laufen über TCP.
+  ratelimit:
+    name: Ratenlimit pro Zone (Anfragen/s)
+    description: Maximale Anfragen pro Sekunde an eine Zone. 0 schaltet ab.
+  ip_ratelimit:
+    name: Ratenlimit pro Client-IP (Anfragen/s)
+    description: >-
+      Maximale Anfragen pro Sekunde pro Client-IP. 0 = aus. AdGuard ist meist
+      der einzige Client - ein niedriger Wert würde das ganze Netz drosseln.
+  private_address_protection:
+    name: Schutz vor DNS-Rebinding
+    description: Private IP-Adressen aus Antworten für öffentliche Namen entfernen.
+  private_domains:
+    name: Private Domains
+    description: Domains, die auf private Adressen zeigen dürfen (z. B. home.arpa).
+  local_zones:
+    name: Lokale Zonen
+    description: Eigene lokale Zonen, z. B. Name "home.arpa", Typ "static".
+    fields:
+      name:
+        name: Zonenname
+        description: Name der Zone, z. B. home.arpa
+      type:
+        name: Typ
+        description: Unbound-local-zone-Typ (static, transparent, redirect, ...).
+  local_data:
+    name: Lokale Einträge
+    description: 'Eigene Einträge, einer pro Zeile, z. B. "nas.home.arpa. IN A 192.0.2.10".'
+  verbosity:
+    name: Log-Detailstufe
+    description: 0 = nur Fehler, 1 = Betriebsinfos, 2 = ausführlich.
+  log_queries:
+    name: Anfragen protokollieren
+    description: Jede Anfrage inkl. Client-IP protokollieren. Aus Datenschutzgründen aus.
+  log_servfail:
+    name: SERVFAIL-Gründe protokollieren
+    description: Protokollieren, warum eine Anfrage fehlschlug (hilfreich bei DNSSEC-/LTE-Problemen).
+  update_root_hints_on_start:
+    name: Root-Hints beim Start aktualisieren
+    description: >-
+      Root-Server-Liste beim Start von internic.net laden (einzige
+      Nicht-DNS-Verbindung der App). Bei Fehler wird die eingebaute Liste genutzt.
+  reset_config:
+    name: Konfiguration zurücksetzen
+    description: >-
+      Löscht beim nächsten Start einmalig die erzeugte Konfiguration und den
+      DNSSEC-Trust-Anchor-Zustand und schaltet sich danach selbst ab.
+      custom.conf bleibt unberührt.
+  forwarding_enabled:
+    name: Forwarding (Notfalloption)
+    description: >-
+      Schaltet die rekursive Auflösung ab und schickt ALLE Anfragen an die
+      Adressen unten. Nur für Netze, in denen die direkte Auflösung nicht
+      funktioniert. Standardmäßig aus.
+  forward_addresses:
+    name: Forwarding-Adressen
+    description: Upstream-Resolver für den Forwarding-Modus, z. B. 192.0.2.53 oder 192.0.2.53@53.
+network:
+  5335/tcp: DNS-Port (TCP) - diesen Port in AdGuard als Upstream eintragen
+  5335/udp: DNS-Port (UDP) - diesen Port in AdGuard als Upstream eintragen
