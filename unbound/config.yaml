@@ -1,0 +1,100 @@
+---
+name: Unbound (recursive)
+version: "1.0.0"
+slug: unbound_recursive
+description: >-
+  Fully recursive, DNSSEC-validating DNS resolver (Unbound). Resolves via the
+  root servers itself - no forwarding to public resolvers by default.
+url: https://github.com/NLnetLabs/unbound
+arch:
+  - aarch64
+  - amd64
+startup: services
+boot: manual
+init: false
+# Bridge network (no host_network). The container listens on 5335; the host
+# port can be changed in the app's "Network" section.
+ports:
+  5335/tcp: 5335
+  5335/udp: 5335
+# Private app folder only (/app_configs/<repo>_unbound_recursive -> /config).
+# Read-only: used solely to read the optional, user-owned custom.conf.
+map:
+  - type: app_config
+    read_only: true
+options:
+  access_control:
+    - 127.0.0.0/8
+    - 10.0.0.0/8
+    - 172.16.0.0/12
+    - 192.168.0.0/16
+  do_ip4: true
+  do_ip6: false
+  do_udp: true
+  do_tcp: true
+  num_threads: 2
+  msg_cache_size_mb: 32
+  rrset_cache_size_mb: 64
+  cache_min_ttl: 0
+  cache_max_ttl: 86400
+  prefetch: true
+  serve_expired: true
+  qname_minimisation: true
+  aggressive_nsec: true
+  harden_dnssec_stripped: true
+  harden_glue: true
+  harden_below_nxdomain: true
+  harden_referral_path: false
+  edns_buffer_size: 1232
+  ratelimit: 1000
+  ip_ratelimit: 0
+  private_address_protection: true
+  private_domains: []
+  local_zones: []
+  local_data: []
+  verbosity: 1
+  log_queries: false
+  log_servfail: false
+  update_root_hints_on_start: true
+  reset_config: false
+  forwarding_enabled: false
+  forward_addresses: []
+schema:
+  access_control:
+    - "match(^[0-9A-Fa-f:.]+/[0-9]{1,3}$)"
+  do_ip4: bool
+  do_ip6: bool
+  do_udp: bool
+  do_tcp: bool
+  num_threads: int(1,4)
+  msg_cache_size_mb: int(4,512)
+  rrset_cache_size_mb: int(4,1024)
+  cache_min_ttl: int(0,3600)
+  cache_max_ttl: int(60,604800)
+  prefetch: bool
+  serve_expired: bool
+  qname_minimisation: bool
+  aggressive_nsec: bool
+  harden_dnssec_stripped: bool
+  harden_glue: bool
+  harden_below_nxdomain: bool
+  harden_referral_path: bool
+  edns_buffer_size: int(512,4096)
+  ratelimit: int(0,100000)
+  ip_ratelimit: int(0,100000)
+  private_address_protection: bool
+  private_domains:
+    - "match(^[A-Za-z0-9._-]+$)"
+  local_zones:
+    - name: "match(^[A-Za-z0-9._-]+$)"
+      type: list(static|transparent|typetransparent|redirect|refuse|deny|always_nxdomain|always_refuse|nodefault)
+  local_data:
+    - "match(^[^\"\\\\\\n]+$)"
+  verbosity: int(0,2)
+  log_queries: bool
+  log_servfail: bool
+  update_root_hints_on_start: bool
+  reset_config: bool
+  forwarding_enabled: bool
+  forward_addresses:
+    - "match(^[0-9A-Fa-f:.]+(@[0-9]{1,5})?$)"
