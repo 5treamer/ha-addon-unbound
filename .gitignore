@@ -1,0 +1,12 @@
+# Local build / test leftovers
+*.log
+*.tar.gz
+*.asc
+.DS_Store
+.vscode/
+.devcontainer/
+# Never commit local test configs or secrets
+*.env
+.env*
+custom.conf
+options.json
